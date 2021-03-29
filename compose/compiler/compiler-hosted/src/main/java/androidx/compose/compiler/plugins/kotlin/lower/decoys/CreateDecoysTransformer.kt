@@ -178,6 +178,7 @@ class CreateDecoysTransformer(
                 name = Name.identifier(
                     if (name.startsWith('$')) name.dropWhile { it == '$' } else name
                 ),
+                type = it.type.remapTypeParameters(original, newFunction),
                 defaultValue = it.defaultValue?.copyWithNewTypeParams(original, newFunction)
             )
         }

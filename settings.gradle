@@ -248,6 +248,7 @@ if (isMultiplatformEnabled()) {
     includeProject(":compose:desktop:desktop", "compose/desktop/desktop", [BuildType.COMPOSE])
     includeProject(":compose:desktop:desktop:desktop-samples", "compose/desktop/desktop/samples", [BuildType.COMPOSE])
     includeProject(":compose:web", "compose/web", [BuildType.COMPOSE])
+    includeProject(":compose:web:integration", "compose/web/integration", [BuildType.COMPOSE])
 }
 includeProject(":compose:foundation", "compose/foundation", [BuildType.COMPOSE])
 includeProject(":compose:foundation:foundation", "compose/foundation/foundation", [BuildType.COMPOSE])
