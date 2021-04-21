@@ -79,9 +79,7 @@ open class ComposableCallChecker :
         platform: TargetPlatform,
         moduleDescriptor: ModuleDescriptor
     ) {
-        if (platform.isJvm() || platform.isJs()) {
-            container.useInstance(this)
-        }
+        container.useInstance(this)
     }
 
     fun checkInlineLambdaCall(

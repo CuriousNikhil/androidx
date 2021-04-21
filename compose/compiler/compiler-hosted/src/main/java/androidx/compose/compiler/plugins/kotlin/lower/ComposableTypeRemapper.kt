@@ -37,7 +37,9 @@ import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrMetadataSourceOwner
 import org.jetbrains.kotlin.ir.declarations.IrProperty
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrTypeParameter
 import org.jetbrains.kotlin.ir.declarations.IrTypeParametersContainer
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.declarations.copyAttributes
 import org.jetbrains.kotlin.ir.declarations.impl.IrFileImpl
 import org.jetbrains.kotlin.ir.expressions.IrCall
@@ -301,6 +303,18 @@ class DeepCopyIrTreeWithSymbolsPreservingMetadata(
             expression.kind,
             expression.value
         ).copyAttributes(expression)
+
+    override fun visitValueParameter(declaration: IrValueParameter): IrValueParameter {
+        return super.visitValueParameter(declaration).also {
+            WrappedComposableDescriptorPatcher.visitValueParameter(it)
+        }
+    }
+
+    override fun visitTypeParameter(declaration: IrTypeParameter): IrTypeParameter {
+        return super.visitTypeParameter(declaration).also {
+            WrappedComposableDescriptorPatcher.visitTypeParameter(it)
+        }
+    }
 
     private fun IrSimpleFunctionSymbol.isBoundButNotRemapped(): Boolean {
         return this.isBound && symbolRemapper.getReferencedFunction(this) == this

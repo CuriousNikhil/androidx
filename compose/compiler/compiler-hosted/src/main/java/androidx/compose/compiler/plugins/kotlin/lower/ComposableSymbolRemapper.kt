@@ -16,13 +16,16 @@
 
 package androidx.compose.compiler.plugins.kotlin.lower
 
+import androidx.compose.compiler.plugins.kotlin.hasComposableAnnotation
 import org.jetbrains.kotlin.descriptors.ClassConstructorDescriptor
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
 import org.jetbrains.kotlin.descriptors.ParameterDescriptor
 import org.jetbrains.kotlin.descriptors.PropertyGetterDescriptor
 import org.jetbrains.kotlin.descriptors.PropertySetterDescriptor
+import org.jetbrains.kotlin.descriptors.ReceiverParameterDescriptor
 import org.jetbrains.kotlin.descriptors.SourceElement
 import org.jetbrains.kotlin.descriptors.TypeParameterDescriptor
+import org.jetbrains.kotlin.descriptors.ValueParameterDescriptor
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -43,14 +46,13 @@ import org.jetbrains.kotlin.ir.util.DeepCopySymbolRemapper
 import org.jetbrains.kotlin.ir.util.DescriptorsRemapper
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
+import org.jetbrains.kotlin.types.KotlinType
 
 /**
- * This symbol remapper is aware of possible wrapped descriptor ownership change to align
- * function signature and descriptor signature in cases of composable value parameters.
- * As wrapped descriptors are bound to IR functions inside, we need to create a new one to change
- * the function this descriptor represents as well.
+ * Symbol remapper which is aware of possible type signature change after changing parameters on
+ * composable function types.
  *
- * E.g. when function has a signature of:
+ * For example, when function has a signature of:
  * ```
  * fun A(@Composable f: () -> Unit)
  * ```
@@ -60,19 +62,25 @@ import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
  * ```
  * Same applies for receiver and return types.
  *
- * After remapping them, the newly created descriptors are bound back using
- * [WrappedComposableDescriptorPatcher] right after IR counterparts are created
+ * The conversion is applied to the two types of descriptors:
+ * 1) Function and constructor descriptors that reference @Composable type, so that IR and
+ *    descriptor signature matches;
+ * 2) All wrapped descriptors. Underlying IR function will be copied anyway, so we need to ensure
+ *    correct connection between such descriptor and IR function it represents.
+ *
+ * After remapping them, all new descriptors are bound to corresponding IR elements using
+ * [WrappedComposableDescriptorPatcher] right after they are created
  * (see usages in [ComposerTypeRemapper])
  *
- * This conversion is only required with decoys, but can be applied to the JVM as well for
- * consistency.
+ * This conversion is only required for KLIB based linking, but can be used on JVM as well
+ * for consistency.
  */
 class ComposableSymbolRemapper : DeepCopySymbolRemapper(
     object : DescriptorsRemapper {
         override fun remapDeclaredConstructor(
             descriptor: ClassConstructorDescriptor
         ): ClassConstructorDescriptor =
-            if (descriptor is WrappedClassConstructorDescriptor) {
+            if (descriptor.isTransformed()) {
                 WrappedClassConstructorDescriptor()
             } else {
                 super.remapDeclaredConstructor(descriptor)
@@ -81,7 +89,7 @@ class ComposableSymbolRemapper : DeepCopySymbolRemapper(
         override fun remapDeclaredSimpleFunction(
             descriptor: FunctionDescriptor
         ): FunctionDescriptor =
-            if (descriptor is WrappedSimpleFunctionDescriptor) {
+            if (descriptor.isTransformed()) {
                 when (descriptor) {
                     is PropertyGetterDescriptor -> WrappedPropertyGetterDescriptor()
                     is PropertySetterDescriptor -> WrappedPropertySetterDescriptor()
@@ -97,26 +105,46 @@ class ComposableSymbolRemapper : DeepCopySymbolRemapper(
         override fun remapDeclaredValueParameter(
             descriptor: ParameterDescriptor
         ): ParameterDescriptor =
-            when (descriptor) {
-                is WrappedValueParameterDescriptor -> {
-                    WrappedValueParameterDescriptor()
+            if (descriptor.isTransformed()) {
+                when (descriptor) {
+                    is ValueParameterDescriptor -> WrappedValueParameterDescriptor()
+                    is ReceiverParameterDescriptor -> WrappedReceiverParameterDescriptor()
+                    else -> super.remapDeclaredValueParameter(descriptor)
                 }
-                is WrappedReceiverParameterDescriptor -> {
-                    WrappedReceiverParameterDescriptor()
-                }
-                else -> {
-                    super.remapDeclaredValueParameter(descriptor)
-                }
+            } else {
+                super.remapDeclaredValueParameter(descriptor)
             }
 
         override fun remapDeclaredTypeParameter(
             descriptor: TypeParameterDescriptor
         ): TypeParameterDescriptor =
-            if (descriptor is WrappedTypeParameterDescriptor) {
+            if (descriptor.isTransformed()) {
                 WrappedTypeParameterDescriptor()
             } else {
                 super.remapDeclaredTypeParameter(descriptor)
             }
+
+        private fun ClassConstructorDescriptor.isTransformed(): Boolean =
+            this is WrappedClassConstructorDescriptor
+                || valueParameters.any { it.type.containsComposable() }
+
+        private fun FunctionDescriptor.isTransformed(): Boolean =
+            this is WrappedSimpleFunctionDescriptor
+                || valueParameters.any { it.type.containsComposable() }
+                || returnType?.containsComposable() == true
+
+        private fun ParameterDescriptor.isTransformed(): Boolean =
+            this is WrappedDeclarationDescriptor<*>
+                || type.containsComposable()
+                || containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
+
+        private fun TypeParameterDescriptor.isTransformed(): Boolean =
+            this is WrappedTypeParameterDescriptor
+                || containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
+
+        private fun KotlinType.containsComposable() =
+            hasComposableAnnotation()
+                || arguments.any { it.type.hasComposableAnnotation() }
     }
 )
 

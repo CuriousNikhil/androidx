@@ -25,6 +25,10 @@ import androidx.compose.compiler.plugins.kotlin.lower.decoys.copyWithNewTypePara
 import androidx.compose.compiler.plugins.kotlin.lower.decoys.isDecoy
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.copyTo
+import org.jetbrains.kotlin.backend.common.ir.copyTypeParameters
+import org.jetbrains.kotlin.backend.common.ir.copyTypeParametersFrom
+import org.jetbrains.kotlin.backend.common.ir.moveBodyTo
+import org.jetbrains.kotlin.backend.common.ir.remapTypeParameters
 import org.jetbrains.kotlin.backend.jvm.ir.isInlineParameter
 import org.jetbrains.kotlin.backend.jvm.lower.inlineclasses.InlineClassAbi
 import org.jetbrains.kotlin.descriptors.FunctionDescriptor
@@ -81,6 +85,7 @@ import org.jetbrains.kotlin.ir.util.functions
 import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.ir.util.isInlined
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
+import org.jetbrains.kotlin.ir.util.remapTypes
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
@@ -402,18 +407,21 @@ class ComposerParamTransformer(
                         propertySymbol.owner.getter = fn
                     }
                     if (propertySymbol.owner.setter == this) {
-                        propertySymbol.owner.setter = this
+                        propertySymbol.owner.setter = fn
                     }
                 }
             }
             fn.parent = parent
-            fn.typeParameters = this.typeParameters.map {
-                it.parent = fn
-                it
-            }
+            fn.copyTypeParametersFrom(this)
+
+            fun IrType.remapTypeParameters() =
+                remapTypeParameters(this@copy, fn)
+
+            fn.returnType = returnType.remapTypeParameters()
+
             fn.dispatchReceiverParameter = dispatchReceiverParameter?.copyTo(fn)
             fn.extensionReceiverParameter = extensionReceiverParameter?.copyTo(fn)
-            fn.valueParameters = valueParameters.map { p ->
+            fn.valueParameters = valueParameters.map { param ->
                 // Composable lambdas will always have `IrGet`s of all of their parameters
                 // generated, since they are passed into the restart lambda. This causes an
                 // interesting corner case with "anonymous parameters" of composable functions.
@@ -422,15 +430,20 @@ class ComposerParamTransformer(
                 // case in composable lambdas. The synthetic name that kotlin generates for
                 // anonymous parameters has an issue where it is not safe to dex, so we sanitize
                 // the names here to ensure that dex is always safe.
-                p.copyTo(
-                    irFunction = fn,
-                    name = dexSafeName(p.name),
-                    defaultValue = p.defaultValue?.copyWithNewTypeParams(this, fn)
+                val newName = dexSafeName(param.name)
+
+                val newType = defaultParameterType(param).remapTypeParameters()
+                param.copyTo(
+                    fn,
+                    name = newName,
+                    type = newType,
+                    defaultValue = param.defaultValue?.copyWithNewTypeParams(this, fn),
+                    isAssignable = param.defaultValue != null
                 )
             }
-            fn.annotations = annotations.map { a -> a }
+            fn.annotations = annotations.toList()
             fn.metadata = metadata
-            fn.body = body
+            fn.body = moveBodyTo(fn)?.copyWithNewTypeParams(this, fn)
         }
     }
 
@@ -514,11 +527,6 @@ class ComposerParamTransformer(
                 val name = JvmAbi.setterName(descriptor.correspondingProperty.name.identifier)
                 fn.annotations += jvmNameAnnotation(name)
                 fn.correspondingPropertySymbol?.owner?.setter = fn
-            }
-
-            fn.valueParameters = fn.valueParameters.map { param ->
-                val newType = defaultParameterType(param)
-                param.copyTo(fn, type = newType, isAssignable = param.defaultValue != null)
             }
 
             val valueParametersMapping = explicitParameters
