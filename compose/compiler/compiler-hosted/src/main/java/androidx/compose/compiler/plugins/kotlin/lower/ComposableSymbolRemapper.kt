@@ -31,7 +31,7 @@ import org.jetbrains.kotlin.types.KotlinType
  * function signature and descriptor signature in cases of composable value parameters.
  * It removes descriptors whenever the signature changes, forcing it to be generated from IR.
  *
- * E.g. when function has a signature of:
+ * For example, when function has a signature of:
  * ```
  * fun A(@Composable f: () -> Unit)
  * ```
