@@ -128,7 +128,8 @@ class AndroidXUiPlugin : Plugin<Project> {
     companion object {
         @JvmStatic
         fun Project.isMultiplatformEnabled(): Boolean {
-            return properties.get(COMPOSE_MPP_ENABLED)?.toString()?.toBoolean() ?: false
+            return true
+//            return properties.get(COMPOSE_MPP_ENABLED)?.toString()?.toBoolean() ?: false
         }
 
         @JvmStatic

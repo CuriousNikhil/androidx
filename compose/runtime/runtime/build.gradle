@@ -27,10 +27,15 @@ plugins {
     id("com.android.library")
 }
 
+repositories {
+    mavenCentral()
+}
+
 AndroidXUiPlugin.applyAndConfigureKotlinPlugin(project)
 
 dependencies {
     kotlinPlugin(project(":compose:compiler:compiler"))
+    kotlinNativeCompilerPluginClasspath(project(":compose:compiler:compiler-hosted"))
 
     if(!AndroidXUiPlugin.isMultiplatformEnabled(project)) {
         /*
@@ -77,6 +82,7 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                 }
             }
         }
+        macosX64()
 
         /*
          * When updating dependencies, make sure to make the an an analogous update in the
