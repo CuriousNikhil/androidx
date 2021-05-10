@@ -33,7 +33,8 @@ dependencies {
 
 kotlin {
     jvm() {
-        withJava()
+        jvm()
+        //withJava()
         application {
             mainClass.value("org.jetbrainsc.compose.common.demo.DemoKt")
         }
