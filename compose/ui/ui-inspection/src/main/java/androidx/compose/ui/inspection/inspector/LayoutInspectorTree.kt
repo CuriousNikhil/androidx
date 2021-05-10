@@ -22,6 +22,8 @@ import androidx.compose.runtime.tooling.CompositionData
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.R
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.inspection.framework.ancestors
+import androidx.compose.ui.inspection.framework.isRoot
 import androidx.compose.ui.layout.GraphicLayerInfo
 import androidx.compose.ui.layout.LayoutInfo
 import androidx.compose.ui.node.RootForTest
@@ -85,6 +87,7 @@ class LayoutInspectorTree {
     private val parameterFactory = ParameterFactory(inlineClassConverter)
     private val cache = ArrayDeque<MutableInspectorNode>()
     private var generatedId = -1L
+    private val rootLocation = IntArray(2)
     /** Map from [LayoutInfo] to the nearest [InspectorNode] that contains it */
     private val claimedNodes = IdentityHashMap<LayoutInfo, InspectorNode>()
     /** Map from parent tree to child trees that are about to be stitched together */
@@ -192,6 +195,8 @@ class LayoutInspectorTree {
     }
 
     private fun clear() {
+        rootLocation[0] = 0
+        rootLocation[1] = 0
         cache.clear()
         inlineClassConverter.clear()
         claimedNodes.clear()
@@ -203,6 +208,8 @@ class LayoutInspectorTree {
 
     @OptIn(InternalComposeApi::class)
     private fun convert(tables: Set<CompositionData>, view: View): List<InspectorNode> {
+        val decorView = view.ancestors().first { it.isRoot() }
+        decorView.getLocationOnScreen(rootLocation)
         val trees = tables.mapNotNull { convert(it, view) }
         return when (trees.size) {
             0 -> listOf()
@@ -414,8 +421,8 @@ class LayoutInspectorTree {
     @OptIn(UiToolingDataApi::class)
     private fun parsePosition(group: Group, node: MutableInspectorNode) {
         val box = group.box
-        node.top = box.top
-        node.left = box.left
+        node.top = box.top + rootLocation[1]
+        node.left = box.left + rootLocation[0]
         node.height = box.bottom - box.top
         node.width = box.right - box.left
     }

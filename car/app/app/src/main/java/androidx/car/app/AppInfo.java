@@ -16,14 +16,11 @@
 
 package androidx.car.app;
 
-import static androidx.car.app.utils.LogTags.TAG;
-
 import static java.util.Objects.requireNonNull;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -48,7 +45,7 @@ import androidx.car.app.versioning.CarAppApiLevels;
  * <manifest ...>
  *   <application ...>
  *     <meta-data
- *         android:name="androidx.car.app.min-api-level"
+ *         android:name="androidx.car.app.minApiLevel"
  *         android:value="1" />
  *     ...
  *   </application>
@@ -62,10 +59,16 @@ public final class AppInfo {
     // TODO(b/174803562): Automatically update the this version using Gradle
     private static final String LIBRARY_VERSION = "1.1.0-alpha01";
 
-    /** @hide */
-    @RestrictTo(Scope.LIBRARY)
-    @VisibleForTesting
-    public static final String MIN_API_LEVEL_MANIFEST_KEY = "androidx.car.app.min-api-level";
+    /**
+     * Application meta-data tag used to define the minimum Car App API level this application is
+     * able to handle.
+     *
+     * <p>If not specified, the library assumes the application can only handle the Car App API
+     * level designed by {@link CarAppApiLevels#getLatest()} at the time of compiling.
+     *
+     * @see CarContext#getCarAppApiLevel()
+     */
+    public static final String MIN_API_LEVEL_MANIFEST_KEY = "androidx.car.app.minApiLevel";
 
     @Keep
     @Nullable
@@ -95,7 +98,6 @@ public final class AppInfo {
         }
         return new AppInfo(minApiLevel, CarAppApiLevels.getLatest(), LIBRARY_VERSION);
     }
-
 
     /**
      * Creates an instance of {@link AppInfo} with the provided version information.
@@ -129,17 +131,17 @@ public final class AppInfo {
             ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(
                     context.getPackageName(),
                     PackageManager.GET_META_DATA);
-            if (applicationInfo.metaData == null) {
-                Log.i(TAG, "Min API level not found (" + MIN_API_LEVEL_MANIFEST_KEY + "). "
-                        + "Assuming min API level = " + CarAppApiLevels.getLatest());
-                return CarAppApiLevels.getLatest();
+            int apiLevel = applicationInfo.metaData != null
+                                   ? applicationInfo.metaData.getInt(
+                                       MIN_API_LEVEL_MANIFEST_KEY, CarAppApiLevels.UNKNOWN)
+                                   : CarAppApiLevels.UNKNOWN;
+            if (apiLevel == CarAppApiLevels.UNKNOWN) {
+                throw new IllegalArgumentException("Min API level not declared in manifest ("
+                    + MIN_API_LEVEL_MANIFEST_KEY + ")");
             }
-            return applicationInfo.metaData.getInt(MIN_API_LEVEL_MANIFEST_KEY,
-                    CarAppApiLevels.getLatest());
+            return apiLevel;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Unable to read min API level from manifest. Assuming "
-                    + CarAppApiLevels.getLatest(), e);
-            return CarAppApiLevels.getLatest();
+            throw new IllegalArgumentException("Unable to read min API level from manifest");
         }
     }
 

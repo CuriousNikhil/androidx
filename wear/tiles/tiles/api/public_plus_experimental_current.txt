@@ -1,12 +1,6 @@
 // Signature format: 4.0
 package androidx.wear.tiles {
 
-  public class SysUiTileUpdateRequester implements androidx.wear.tiles.TileUpdateRequester {
-    ctor public SysUiTileUpdateRequester(android.content.Context);
-    method public void requestUpdate(Class<? extends android.app.Service>);
-    field public static final String ACTION_BIND_UPDATE_REQUESTER = "androidx.wear.tiles.action.BIND_UPDATE_REQUESTER";
-  }
-
   public abstract class TileProviderService extends android.app.Service {
     ctor public TileProviderService();
     method public static androidx.wear.tiles.TileUpdateRequester getUpdater(android.content.Context);
@@ -23,16 +17,10 @@ package androidx.wear.tiles {
   }
 
   public interface TileUpdateRequester {
-    method public void requestUpdate(Class<? extends android.app.Service>);
+    method public void requestUpdate(Class<? extends androidx.wear.tiles.TileProviderService>);
   }
 
   @RequiresOptIn(level=androidx.annotation.RequiresOptIn.Level.ERROR) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.TYPE, java.lang.annotation.ElementType.FIELD}) public @interface TilesExperimental {
-  }
-
-  public class ViewerTileUpdateRequester implements androidx.wear.tiles.TileUpdateRequester {
-    ctor public ViewerTileUpdateRequester(android.content.Context);
-    method public void requestUpdate(Class<? extends android.app.Service>);
-    field public static final String ACTION_REQUEST_TILE_UPDATE = "androidx.wear.tiles.action.REQUEST_TILE_UPDATE";
   }
 
 }
@@ -656,6 +644,8 @@ package androidx.wear.tiles.builders {
 
   public static final class ModifiersBuilders.Padding.Builder {
     method public androidx.wear.tiles.builders.ModifiersBuilders.Padding build();
+    method public androidx.wear.tiles.builders.ModifiersBuilders.Padding.Builder setAll(androidx.wear.tiles.builders.DimensionBuilders.DpProp);
+    method public androidx.wear.tiles.builders.ModifiersBuilders.Padding.Builder setAll(androidx.wear.tiles.builders.DimensionBuilders.DpProp.Builder);
     method public androidx.wear.tiles.builders.ModifiersBuilders.Padding.Builder setBottom(androidx.wear.tiles.builders.DimensionBuilders.DpProp);
     method public androidx.wear.tiles.builders.ModifiersBuilders.Padding.Builder setBottom(androidx.wear.tiles.builders.DimensionBuilders.DpProp.Builder);
     method public androidx.wear.tiles.builders.ModifiersBuilders.Padding.Builder setEnd(androidx.wear.tiles.builders.DimensionBuilders.DpProp);
@@ -706,8 +696,8 @@ package androidx.wear.tiles.builders {
 
   public static final class ResourceBuilders.ImageResource.Builder {
     method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource build();
-    method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setAndroidResourceByResid(androidx.wear.tiles.builders.ResourceBuilders.AndroidImageResourceByResId);
-    method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setAndroidResourceByResid(androidx.wear.tiles.builders.ResourceBuilders.AndroidImageResourceByResId.Builder);
+    method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setAndroidResourceByResId(androidx.wear.tiles.builders.ResourceBuilders.AndroidImageResourceByResId);
+    method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setAndroidResourceByResId(androidx.wear.tiles.builders.ResourceBuilders.AndroidImageResourceByResId.Builder);
     method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setInlineResource(androidx.wear.tiles.builders.ResourceBuilders.InlineImageResource);
     method public androidx.wear.tiles.builders.ResourceBuilders.ImageResource.Builder setInlineResource(androidx.wear.tiles.builders.ResourceBuilders.InlineImageResource.Builder);
   }
@@ -822,19 +812,15 @@ package androidx.wear.tiles.readers {
   }
 
   public static class EventReaders.TileAddEvent {
-    method public int getTileId();
   }
 
   public static class EventReaders.TileEnterEvent {
-    method public int getTileId();
   }
 
   public static class EventReaders.TileLeaveEvent {
-    method public int getTileId();
   }
 
   public static class EventReaders.TileRemoveEvent {
-    method public int getTileId();
   }
 
   public class RequestReaders {
@@ -843,14 +829,12 @@ package androidx.wear.tiles.readers {
   public static class RequestReaders.ResourcesRequest {
     method public androidx.wear.tiles.readers.DeviceParametersReaders.DeviceParameters getDeviceParameters();
     method public java.util.List<java.lang.String!> getResourceIds();
-    method public int getTileId();
     method public String getVersion();
   }
 
   public static class RequestReaders.TileRequest {
     method public androidx.wear.tiles.readers.DeviceParametersReaders.DeviceParameters getDeviceParameters();
     method public androidx.wear.tiles.builders.StateBuilders.State getState();
-    method public int getTileId();
   }
 
 }

@@ -16,6 +16,7 @@
 
 package androidx.build.uptodatedness
 
+import androidx.build.VERIFY_UP_TO_DATE
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -33,11 +34,11 @@ import java.util.Date
  */
 
 const val DISALLOW_TASK_EXECUTION_FLAG_NAME = "disallowExecution"
-const val RECORD_FLAG_NAME = "verifyUpToDate"
+const val RECORD_FLAG_NAME = VERIFY_UP_TO_DATE
 
 // Temporary set of exempt tasks that are known to still be out-of-date after running once
-// Entries in this set may be task names (like assembleDebug) or task paths
-// (like :core:core:assembleDebug)
+// Entries in this set may be task names (like assembleRelease) or task paths
+// (like :core:core:assembleRelease)
 // Entries in this set do still get rerun because they might produce files that are needed by
 // subsequent tasks
 val ALLOW_RERUNNING_TASKS = setOf(
@@ -117,6 +118,7 @@ val ALLOW_RERUNNING_TASKS = setOf(
     ":camera:integration-tests:camera-testapp-core:packageDebug",
     ":camera:integration-tests:camera-testapp-extensions:mergeLibDexDebug",
     ":camera:integration-tests:camera-testapp-extensions:packageDebug",
+    ":camera:integration-tests:camera-testapp-extensions:GenerateTestConfigurationdebugAndroidTest",
     ":camera:integration-tests:camera-testapp-uiwidgets:mergeLibDexDebug",
     ":camera:integration-tests:camera-testapp-uiwidgets:packageDebug",
     ":camera:integration-tests:camera-testapp-core:GenerateTestConfigurationdebug",
@@ -125,6 +127,16 @@ val ALLOW_RERUNNING_TASKS = setOf(
     ":camera:integration-tests:camera-testapp-view:GenerateTestConfigurationdebugAndroidTest",
     ":camera:integration-tests:camera-testapp-view:mergeLibDexDebug",
     ":camera:integration-tests:camera-testapp-view:packageDebug",
+    ":benchmark:benchmark-macro:generateReleaseProtos",
+    ":benchmark:benchmark-macro:generateDebugProtos",
+    ":benchmark:benchmark-macro:compileReleaseKotlin",
+    ":benchmark:benchmark-macro:compileDebugKotlin",
+    ":benchmark:benchmark-macro:compileReleaseJavaWithJavac",
+    ":benchmark:benchmark-macro:compileDebugJavaWithJavac",
+    ":benchmark:benchmark-macro:extractReleaseAnnotations",
+    ":benchmark:benchmark-macro:extractDebugAnnotations",
+    ":benchmark:benchmark-macro:generateApi",
+    ":benchmark:benchmark-macro:runErrorProne"
 )
 
 // Additional tasks that are expected to be temporarily out-of-date after running once
@@ -291,7 +303,7 @@ class TaskUpToDateValidator {
             }
 
             val reproductionMessage = "\nTo reproduce this error you can try running " +
-                "`./gradlew ${task.path} -PverifyUpToDate`\n"
+                "`./gradlew ${task.path} -P$RECORD_FLAG_NAME`\n"
             val readLogsMessage = "\nYou can check why Gradle executed ${task.path} by " +
                 "passing the '--info' flag to Gradle and then searching stdout for output " +
                 "generated immediately before the task began to execute.\n" +

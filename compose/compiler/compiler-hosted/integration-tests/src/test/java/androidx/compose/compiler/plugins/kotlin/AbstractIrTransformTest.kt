@@ -193,6 +193,7 @@ abstract class AbstractIrTransformTest : AbstractCodegenTest() {
         @Language("kotlin")
         source: String,
         expectedTransformed: String,
+        @Language("kotlin")
         extra: String = "",
         validator: (element: IrElement) -> Unit = { },
         dumpTree: Boolean = false,
@@ -233,6 +234,11 @@ abstract class AbstractIrTransformTest : AbstractCodegenTest() {
                     "${it.groupValues[1]}<>"
                 }
             }
+            .replace(
+                Regex("(sourceInformationMarkerStart\\(%composer, )([-\\d]+)")
+            ) {
+                "${it.groupValues[1]}<>"
+            }
             // replace source information with source it references
             .replace(
                 Regex(
@@ -241,8 +247,13 @@ abstract class AbstractIrTransformTest : AbstractCodegenTest() {
                 )
             ) {
                 "${it.groupValues[1]}\"${
-                generateSourceInfo(it.groupValues[3], source)
+                generateSourceInfo(it.groupValues[4], source)
                 }\")"
+            }
+            .replace(
+                Regex("(sourceInformation(MarkerStart)?\\(.*)\"(.*)\"\\)")
+            ) {
+                "${it.groupValues[1]}\"${generateSourceInfo(it.groupValues[3], source)}\")"
             }
             .replace(
                 Regex(
@@ -262,16 +273,15 @@ abstract class AbstractIrTransformTest : AbstractCodegenTest() {
             ) {
                 "${it.groupValues[1]}<>"
             }
-            // composableLambdaInstance(<>, true, )
+            // composableLambdaInstance(<>, true)
             .replace(
                 Regex(
-                    "(composableLambdaInstance\\()([-\\d]+, (true|false), (null|\"(.*)\")\\))"
+                    "(composableLambdaInstance\\()([-\\d]+, (true|false))"
                 )
             ) {
                 val callStart = it.groupValues[1]
                 val tracked = it.groupValues[3]
-                val sourceInfo = it.groupValues[5]
-                "$callStart<>, $tracked, \"${generateSourceInfo(sourceInfo, source)}\")"
+                "$callStart<>, $tracked"
             }
             // composableLambda(%composer, <>, true)
             .replace(

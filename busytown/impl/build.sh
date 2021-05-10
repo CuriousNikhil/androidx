@@ -3,6 +3,12 @@ set -e
 
 # This script runs frameworks/support/gradlew
 
+function showDiskStats() {
+  echo "df -h"
+  df -h
+}
+showDiskStats
+
 # find script
 SCRIPT_DIR="$(cd $(dirname $0) && pwd)"
 
@@ -38,6 +44,7 @@ function run() {
     # Put each argument on its own line because some arguments may be long.
     # Also put "\" at the end of non-final lines so the command can be copy-pasted
     echo "$*" | sed 's/ / \\\n/g' | sed 's/^/    /' >&2
+    showDiskStats
     return 1
   fi
 }
@@ -53,7 +60,7 @@ fi
 # --no-watch-fs disables file system watch, because it does not work on busytown
 # due to our builders using OS that is too old.
 run $PROJECTS_ARG OUT_DIR=$OUT_DIR DIST_DIR=$DIST_DIR ANDROID_HOME=../../prebuilts/fullsdk-linux \
-    ./gradlew --ci "$@"
+    ./gradlew --ci saveSystemStats "$@"
 
 # check that no unexpected modifications were made to the source repository, such as new cache directories
 DIST_DIR=$DIST_DIR $SCRIPT_DIR/verify_no_caches_in_source_repo.sh $BUILD_START_MARKER

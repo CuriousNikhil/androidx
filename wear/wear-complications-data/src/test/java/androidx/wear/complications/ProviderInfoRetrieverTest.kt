@@ -18,6 +18,7 @@ package androidx.wear.complications
 
 import android.content.ComponentName
 import android.content.Context
+import android.graphics.drawable.Icon
 import android.os.IBinder
 import android.support.wearable.complications.IPreviewComplicationDataCallback
 import android.support.wearable.complications.IProviderInfoService
@@ -59,7 +60,7 @@ public class ProviderInfoRetrieverTest {
     private val providerInfoRetriever = ProviderInfoRetriever(mockService)
 
     @Test
-    public fun requestPreviewComplicationData() {
+    public fun retrievePreviewComplicationData() {
         runBlocking {
             val component = ComponentName("provider.package", "provider.class")
             val type = ComplicationType.LONG_TEXT
@@ -93,7 +94,7 @@ public class ProviderInfoRetrieverTest {
     }
 
     @Test
-    public fun requestPreviewComplicationDataProviderReturnsNull() {
+    public fun retrievePreviewComplicationDataProviderReturnsNull() {
         runBlocking {
             val component = ComponentName("provider.package", "provider.class")
             val type = ComplicationType.LONG_TEXT
@@ -116,7 +117,7 @@ public class ProviderInfoRetrieverTest {
     }
 
     @Test
-    public fun requestPreviewComplicationDataApiNotSupported() {
+    public fun retrievePreviewComplicationDataApiNotSupported() {
         runBlocking {
             val component = ComponentName("provider.package", "provider.class")
             val type = ComplicationType.LONG_TEXT
@@ -129,7 +130,7 @@ public class ProviderInfoRetrieverTest {
     }
 
     @Test
-    public fun requestPreviewComplicationDataApiReturnsFalse() {
+    public fun retrievePreviewComplicationDataApiReturnsFalse() {
         runBlocking {
             val component = ComponentName("provider.package", "provider.class")
             val type = ComplicationType.LONG_TEXT
@@ -146,5 +147,17 @@ public class ProviderInfoRetrieverTest {
             assertThat(providerInfoRetriever.retrievePreviewComplicationData(component, type))
                 .isNull()
         }
+    }
+
+    @Test
+    public fun complicationProviderInfo_NullComponentName() {
+        val complicationProviderInfo = ComplicationProviderInfo(
+            "appName",
+            "name",
+            Icon.createWithContentUri("icon"),
+            ComplicationType.SHORT_TEXT,
+            componentName = null
+        )
+        assertThat(complicationProviderInfo.componentName).isNull()
     }
 }

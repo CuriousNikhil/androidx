@@ -17,8 +17,10 @@
 package androidx.testutils
 
 import android.os.Bundle
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.navigation.testing.TestNavigatorState
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -26,13 +28,17 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class TestNavigatorTest {
 
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @Test
     fun backStack() {
         val testNavigator = TestNavigator()
-        testNavigator.onAttach(TestNavigatorState())
+        val state = TestNavigatorState()
+        testNavigator.onAttach(state)
         val destination = testNavigator.createDestination()
         val args = Bundle()
-        testNavigator.navigate(destination, args, null, null)
+        testNavigator.navigate(listOf(state.createBackStackEntry(destination, args)), null, null)
         assertEquals(
             "TestNavigator back stack size is 1 after navigate",
             1,

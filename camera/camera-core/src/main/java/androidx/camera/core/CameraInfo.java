@@ -157,10 +157,7 @@ public interface CameraInfo {
      * respectively.
      *
      * @return A {@link LiveData} of the camera's state.
-     * @hide
      */
-    // TODO(b/150921286): Unhide once the camera state implementation is done
-    @RestrictTo(Scope.LIBRARY_GROUP)
     @NonNull
     LiveData<CameraState> getCameraState();
 
@@ -177,6 +174,15 @@ public interface CameraInfo {
     @RestrictTo(Scope.LIBRARY_GROUP)
     @ImplementationType
     String getImplementationType();
+
+    /**
+     * Returns a {@link CameraSelector} unique to this camera.
+     *
+     * @return {@link CameraSelector} unique to this camera.
+     */
+    @ExperimentalCameraFilter
+    @NonNull
+    CameraSelector getCameraSelector();
 
     /** @hide */
     @StringDef(open = true, value = {IMPLEMENTATION_TYPE_UNKNOWN,

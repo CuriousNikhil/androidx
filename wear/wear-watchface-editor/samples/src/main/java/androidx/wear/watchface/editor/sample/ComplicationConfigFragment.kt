@@ -20,14 +20,18 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.annotation.RequiresApi
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.wear.complications.ComplicationProviderInfo
 import androidx.wear.complications.data.ComplicationData
 import androidx.wear.watchface.DrawMode
 import androidx.wear.watchface.RenderParameters
@@ -78,6 +82,10 @@ internal class ConfigView(
     private val watchFaceConfigActivity: WatchFaceConfigActivity
 ) : SwipeDismissFrameLayout(context) {
 
+    companion object {
+        private const val TAG = "ConfigView"
+    }
+
     private lateinit var previewComplicationData: Map<Int, ComplicationData>
     private val drawRect = Rect()
 
@@ -85,19 +93,36 @@ internal class ConfigView(
     private val complicationButtons =
         watchFaceConfigActivity.editorSession.complicationsState.mapValues { stateEntry ->
             // TODO(alexclarke): This button is a Rect which makes the tap animation look bad.
-            Button(context).apply {
-                // Make the button transparent unless tapped upon.
-                setBackgroundResource(
-                    TypedValue().apply {
-                        context.theme.resolveAttribute(
-                            android.R.attr.selectableItemBackground,
-                            this,
-                            true
-                        )
-                    }.resourceId
-                )
-                setOnClickListener { onComplicationButtonClicked(stateEntry.key) }
-                addView(this)
+            if (stateEntry.value.fixedComplicationProvider ||
+                !stateEntry.value.isEnabled ||
+                stateEntry.key == watchFaceConfigActivity.editorSession.backgroundComplicationId
+            ) {
+                // Do not create a button for fixed complications, disabled complications, or
+                // background complications.
+                null
+            } else {
+                Button(context).apply {
+                    // Make the button transparent unless tapped upon.
+                    setBackgroundResource(
+                        TypedValue().apply {
+                            context.theme.resolveAttribute(
+                                android.R.attr.selectableItemBackground,
+                                this,
+                                true
+                            )
+                        }.resourceId
+                    )
+                    setOnClickListener { onComplicationButtonClicked(stateEntry.key) }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        setOnLongClickListener {
+                            TooltipApi26.updateTooltip(it, watchFaceConfigActivity, stateEntry.key)
+                            // Do not consume the long click so that the tooltip is shown by the
+                            // default handler.
+                            false
+                        }
+                    }
+                    addView(this)
+                }
             }
         }
 
@@ -113,7 +138,7 @@ internal class ConfigView(
         super.onLayout(changed, left, top, right, bottom)
         for ((id, view) in complicationButtons) {
             val rect = watchFaceConfigActivity.editorSession.complicationsState[id]!!.bounds
-            view.layout(
+            view?.layout(
                 rect.left,
                 rect.top,
                 rect.right,
@@ -124,10 +149,31 @@ internal class ConfigView(
 
     private fun onComplicationButtonClicked(complicationId: Int) {
         watchFaceConfigActivity.coroutineScope.launch {
-            watchFaceConfigActivity.fragmentController.showComplicationConfig(complicationId)
+            val chosenComplicationProvider =
+                watchFaceConfigActivity.fragmentController.showComplicationConfig(complicationId)
+            Log.d(TAG, "showComplicationConfig: $chosenComplicationProvider")
             // Redraw after the complication provider chooser has run.
             invalidate()
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private object TooltipApi26 {
+        fun updateTooltip(
+            button: View,
+            watchFaceConfigActivity: WatchFaceConfigActivity,
+            complicationId: Int
+        ) {
+            watchFaceConfigActivity.coroutineScope.launch {
+                val providerInfo =
+                    watchFaceConfigActivity.editorSession
+                        .getComplicationsProviderInfo()[complicationId]
+                button.tooltipText = getProviderInfoToast(providerInfo)
+            }
+        }
+
+        private fun getProviderInfoToast(providerInfo: ComplicationProviderInfo?): String =
+            providerInfo?.name ?: "Empty complication provider"
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {

@@ -153,6 +153,9 @@ publishing {
 }
 
 android {
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.pro'
+    }
     buildTypes {
         debug {
             testCoverageEnabled = false

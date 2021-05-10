@@ -19,6 +19,7 @@ package androidx.wear.watchface.style
 import android.graphics.drawable.Icon
 import androidx.annotation.RestrictTo
 import androidx.wear.complications.ComplicationBounds
+import androidx.wear.complications.data.ComplicationType
 import androidx.wear.watchface.style.UserStyleSetting.ComplicationsUserStyleSetting.ComplicationOverlay
 import androidx.wear.watchface.style.UserStyleSetting.ComplicationsUserStyleSetting.ComplicationsOption
 import androidx.wear.watchface.style.UserStyleSetting.Id.Companion.MAX_LENGTH
@@ -358,7 +359,8 @@ public sealed class UserStyleSetting(
      * The ComplicationsManager listens for style changes with this setting and when a
      * [ComplicationsOption] is selected the overrides are automatically applied. Note its suggested
      * that the default [ComplicationOverlay] (the first entry in the list) does not apply any
-     * overrides.
+     * overrides. Only a single [ComplicationsUserStyleSetting] is permitted in the
+     * [UserStyleSchema].
      *
      * Not to be confused with complication provider selection.
      */
@@ -437,7 +439,11 @@ public sealed class UserStyleSetting(
                         "Unrecognised wireFormat.mEnabled " + wireFormat.mEnabled
                     )
                 },
-                wireFormat.mPerComplicationTypeBounds?.let { ComplicationBounds(it) },
+                wireFormat.mPerComplicationTypeBounds?.let {
+                    ComplicationBounds(
+                        it.mapKeys { ComplicationType.fromWireType(it.key) }
+                    )
+                },
                 wireFormat.accessibilityTraversalIndex
             )
 
@@ -445,7 +451,9 @@ public sealed class UserStyleSetting(
                 ComplicationOverlayWireFormat(
                     complicationId,
                     enabled,
-                    complicationBounds?.perComplicationTypeBounds,
+                    complicationBounds?.perComplicationTypeBounds?.mapKeys {
+                        it.key.toWireComplicationType()
+                    },
                     accessibilityTraversalIndex
                 )
         }
@@ -942,7 +950,8 @@ public sealed class UserStyleSetting(
 
     /**
      * An application specific style setting. This style is ignored by the system editor. This is
-     * expected to be used in conjunction with an on watch face editor.
+     * expected to be used in conjunction with an on watch face editor. Only a single
+     * [ComplicationsUserStyleSetting] is permitted in the [UserStyleSchema].
      */
     public class CustomValueUserStyleSetting : UserStyleSetting {
         internal companion object {

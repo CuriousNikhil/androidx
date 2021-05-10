@@ -20,7 +20,6 @@ import static androidx.car.app.CarToast.LENGTH_LONG;
 import static androidx.car.app.model.Action.BACK;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.OptIn;
 import androidx.car.app.CarContext;
 import androidx.car.app.CarToast;
 import androidx.car.app.Screen;
@@ -28,10 +27,12 @@ import androidx.car.app.model.Action;
 import androidx.car.app.model.ActionStrip;
 import androidx.car.app.model.CarColor;
 import androidx.car.app.model.LongMessageTemplate;
+import androidx.car.app.model.MessageTemplate;
+import androidx.car.app.model.ParkedOnlyOnClickListener;
 import androidx.car.app.model.Template;
+import androidx.car.app.versioning.CarAppApiLevels;
 
 /** A screen that demonstrates the long message template. */
-@OptIn(markerClass = androidx.car.app.annotations.ExperimentalCarApi.class)
 public class LongMessageTemplateDemoScreen extends Screen {
     private static final String TEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
             + "Aliquam laoreet ac metus eu commodo. Sed a congue diam, sed dictum lectus. Nam nec"
@@ -83,16 +84,24 @@ public class LongMessageTemplateDemoScreen extends Screen {
     @NonNull
     @Override
     public Template onGetTemplate() {
+        if (getCarContext().getCarAppApiLevel() < CarAppApiLevels.LEVEL_2) {
+            return new MessageTemplate.Builder("Your host doesn't support Long Message template")
+                    .setTitle("Incompatible host")
+                    .setHeaderAction(Action.BACK)
+                    .build();
+        }
         return new LongMessageTemplate.Builder(TEXT)
                 .setTitle("Long Message Template Demo")
                 .setHeaderAction(BACK)
                 .addAction(new Action.Builder()
-                        .setOnClickListener(() -> getScreenManager().pop())
+                        .setOnClickListener(
+                                ParkedOnlyOnClickListener.create(() -> getScreenManager().pop()))
                         .setTitle("Accept")
                         .build())
                 .addAction(new Action.Builder()
                         .setBackgroundColor(CarColor.RED)
-                        .setOnClickListener(() -> getScreenManager().pop())
+                        .setOnClickListener(
+                                ParkedOnlyOnClickListener.create(() -> getScreenManager().pop()))
                         .setTitle("Reject")
                         .build())
                 .setActionStrip(new ActionStrip.Builder()

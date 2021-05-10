@@ -32,7 +32,6 @@ import android.support.wearable.watchface.WatchFaceStyle
 import android.util.Base64
 import android.view.Gravity
 import android.view.Surface.FRAME_RATE_COMPATIBILITY_DEFAULT
-import android.view.ViewConfiguration
 import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
 import androidx.annotation.IntRange
@@ -436,9 +435,9 @@ public class WatchFaceImpl(
     private var mockTime = MockTime(1.0, 0, Long.MAX_VALUE)
 
     private var lastTappedComplicationId: Int? = null
-    private var registeredReceivers = false
+    internal var broadcastsReceiver: BroadcastsReceiver? = null
 
-    // True if NotificationManager.INTERRUPTION_FILTER_NONE.
+    // True if 'Do Not Disturb' mode is on.
     private var muteMode = false
     private var nextDrawTimeMillis: Long = 0
 
@@ -447,8 +446,6 @@ public class WatchFaceImpl(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public val calendar: Calendar = Calendar.getInstance()
 
-    private val pendingSingleTap: CancellableUniqueTask =
-        CancellableUniqueTask(watchFaceHostApi.getHandler())
     private val pendingUpdateTime: CancellableUniqueTask =
         CancellableUniqueTask(watchFaceHostApi.getHandler())
 
@@ -468,7 +465,7 @@ public class WatchFaceImpl(
         legacyWatchFaceStyle.tapEventsAccepted
     )
 
-    private val broadcastEventObserver = object : BroadcastReceivers.BroadcastEventObserver {
+    private val broadcastEventObserver = object : BroadcastsReceiver.BroadcastEventObserver {
         override fun onActionTimeTick() {
             if (!watchState.isAmbient.value) {
                 renderer.invalidate()
@@ -543,7 +540,11 @@ public class WatchFaceImpl(
     }
 
     private val interruptionFilterObserver = Observer<Int> {
-        val inMuteMode = it == NotificationManager.INTERRUPTION_FILTER_NONE
+        // We are in mute mode in any of the following modes. The specific mode depends on the
+        // device's implementation of "Do Not Disturb".
+        val inMuteMode = it == NotificationManager.INTERRUPTION_FILTER_NONE ||
+            it == NotificationManager.INTERRUPTION_FILTER_PRIORITY ||
+            it == NotificationManager.INTERRUPTION_FILTER_ALARMS
         if (muteMode != inMuteMode) {
             muteMode = inMuteMode
             watchFaceHostApi.invalidate()
@@ -739,7 +740,6 @@ public class WatchFaceImpl(
     }
 
     internal fun onDestroy() {
-        pendingSingleTap.cancel()
         pendingUpdateTime.cancel()
         renderer.onDestroy()
         watchState.isAmbient.removeObserver(ambientObserver)
@@ -754,23 +754,26 @@ public class WatchFaceImpl(
         unregisterReceivers()
     }
 
+    @UiThread
     private fun registerReceivers() {
-        if (registeredReceivers) {
-            return
+        require(watchFaceHostApi.getHandler().looper.isCurrentThread) {
+            "registerReceivers must be called the UiThread"
         }
-        registeredReceivers = true
-        BroadcastReceivers.addBroadcastEventObserver(
-            watchFaceHostApi.getContext(),
-            broadcastEventObserver
-        )
+
+        // There's no point registering BroadcastsReceiver for headless instances.
+        if (broadcastsReceiver == null && !watchState.isHeadless) {
+            broadcastsReceiver =
+                BroadcastsReceiver(watchFaceHostApi.getContext(), broadcastEventObserver)
+        }
     }
 
+    @UiThread
     private fun unregisterReceivers() {
-        if (!registeredReceivers) {
-            return
+        require(watchFaceHostApi.getHandler().looper.isCurrentThread) {
+            "unregisterReceivers must be called the UiThread"
         }
-        registeredReceivers = false
-        BroadcastReceivers.removeBroadcastEventObserver(broadcastEventObserver)
+        broadcastsReceiver?.onDestroy()
+        broadcastsReceiver = null
     }
 
     private fun scheduleDraw() {
@@ -912,7 +915,8 @@ public class WatchFaceImpl(
     ) {
         val tappedComplication = complicationsManager.getComplicationAt(x, y)
         if (tappedComplication == null) {
-            clearGesture()
+            // The event does not belong to any of the complications, pass to the listener.
+            lastTappedComplicationId = null
             tapListener?.onTap(tapType, x, y)
             return
         }
@@ -922,43 +926,21 @@ public class WatchFaceImpl(
                 if (tappedComplication.id != lastTappedComplicationId &&
                     lastTappedComplicationId != null
                 ) {
-                    clearGesture()
+                    // The UP event belongs to a different complication then the DOWN event,
+                    // do not consider this a tap on either of them.
+                    lastTappedComplicationId = null
                     return
                 }
-                if (!pendingSingleTap.isPending()) {
-                    // Give the user immediate visual feedback, the UI feels sluggish if we defer
-                    // this.
-                    complicationsManager.displayPressedAnimation(tappedComplication.id)
-
-                    lastTappedComplicationId = tappedComplication.id
-
-                    // This could either be a single or a double tap, post a task to process the
-                    // single tap which will get canceled if a double tap gets there first
-                    pendingSingleTap.postDelayedUnique(
-                        ViewConfiguration.getDoubleTapTimeout().toLong()
-                    ) {
-                        complicationsManager.onComplicationSingleTapped(tappedComplication.id)
-                        watchFaceHostApi.invalidate()
-                        clearGesture()
-                    }
-                }
+                complicationsManager.displayPressedAnimation(tappedComplication.id)
+                complicationsManager.onComplicationSingleTapped(tappedComplication.id)
+                watchFaceHostApi.invalidate()
+                lastTappedComplicationId = null
             }
             TapType.DOWN -> {
-                // Make sure the user isn't doing a swipe.
-                if (tappedComplication.id != lastTappedComplicationId &&
-                    lastTappedComplicationId != null
-                ) {
-                    clearGesture()
-                }
                 lastTappedComplicationId = tappedComplication.id
             }
-            else -> clearGesture()
+            else -> lastTappedComplicationId = null
         }
-    }
-
-    private fun clearGesture() {
-        lastTappedComplicationId = null
-        pendingSingleTap.cancel()
     }
 
     @UiThread
@@ -971,7 +953,6 @@ public class WatchFaceImpl(
         writer.println("mockTime.speed=${mockTime.speed}")
         writer.println("nextDrawTimeMillis=$nextDrawTimeMillis")
         writer.println("muteMode=$muteMode")
-        writer.println("pendingSingleTap=${pendingSingleTap.isPending()}")
         writer.println("pendingUpdateTime=${pendingUpdateTime.isPending()}")
         writer.println("lastTappedComplicationId=$lastTappedComplicationId")
         writer.println("currentUserStyleRepository.userStyle=${userStyleRepository.userStyle}")

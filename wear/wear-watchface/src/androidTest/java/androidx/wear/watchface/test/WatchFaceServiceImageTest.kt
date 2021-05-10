@@ -48,6 +48,7 @@ import androidx.wear.watchface.WatchFaceService
 import androidx.wear.watchface.control.IInteractiveWatchFace
 import androidx.wear.watchface.control.IPendingInteractiveWatchFace
 import androidx.wear.watchface.control.InteractiveInstanceManager
+import androidx.wear.watchface.control.data.CrashInfoParcel
 import androidx.wear.watchface.control.data.WallpaperInteractiveWatchFaceInstanceParams
 import androidx.wear.watchface.control.data.WatchFaceRenderParams
 import androidx.wear.watchface.data.DeviceConfig
@@ -61,6 +62,7 @@ import androidx.wear.watchface.style.WatchFaceLayer
 import androidx.wear.watchface.style.data.UserStyleWireFormat
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -173,9 +175,14 @@ public class WatchFaceServiceImageTest {
 
     @After
     public fun shutDown() {
-        if (this::interactiveWatchFaceInstance.isInitialized) {
-            interactiveWatchFaceInstance.release()
+        val latch = CountDownLatch(1)
+        handler.post {
+            if (this::interactiveWatchFaceInstance.isInitialized) {
+                interactiveWatchFaceInstance.release()
+            }
+            latch.countDown()
         }
+        latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
     }
 
     private fun initCanvasWatchFace() {
@@ -267,6 +274,10 @@ public class WatchFaceServiceImageTest {
                                     TimeZone.getTimeZone("UTC")
                                 initLatch.countDown()
                             }
+                        }
+
+                        override fun onInteractiveWatchFaceCrashed(exception: CrashInfoParcel?) {
+                            fail("WatchFace crashed: $exception")
                         }
                     }
                 )
@@ -596,7 +607,12 @@ public class WatchFaceServiceImageTest {
         try {
             bitmap.assertAgainstGolden(screenshotRule, "direct_boot")
         } finally {
-            engineWrapper.onDestroy()
+            val latch = CountDownLatch(1)
+            handler.post {
+                engineWrapper.onDestroy()
+                latch.countDown()
+            }
+            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
         }
     }
 

@@ -39,13 +39,12 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
-import androidx.annotation.OptIn;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.StringDef;
-import androidx.car.app.annotations.ExperimentalCarApi;
 import androidx.car.app.annotations.RequiresCarApi;
 import androidx.car.app.constraints.ConstraintManager;
 import androidx.car.app.navigation.NavigationManager;
+import androidx.car.app.notification.CarPendingIntent;
 import androidx.car.app.utils.RemoteUtils;
 import androidx.car.app.utils.ThreadUtils;
 import androidx.car.app.versioning.CarAppApiLevel;
@@ -97,7 +96,6 @@ public class CarContext extends ContextWrapper {
     @StringDef({APP_SERVICE, CAR_SERVICE, NAVIGATION_SERVICE, SCREEN_SERVICE, CONSTRAINT_SERVICE})
     @Retention(RetentionPolicy.SOURCE)
     @RestrictTo(LIBRARY)
-    @OptIn(markerClass = ExperimentalCarApi.class)
     public @interface CarServiceType {
     }
 
@@ -114,7 +112,6 @@ public class CarContext extends ContextWrapper {
     public static final String SCREEN_SERVICE = "screen";
 
     /** Manages constraints for the app as enforced by the connected host. */
-    @ExperimentalCarApi
     @RequiresCarApi(2)
     public static final String CONSTRAINT_SERVICE = "constraints";
 
@@ -133,7 +130,8 @@ public class CarContext extends ContextWrapper {
     /**
      * Standard action for navigating to a location.
      *
-     * <p>Used as the {@link Intent}'s action for starting a navigation via {@link #startCarApp}.
+     * <p>Used as the {@link Intent}'s action for starting a navigation via
+     * {@link #startCarApp(Intent)}.
      */
     public static final String ACTION_NAVIGATE = "androidx.car.app.action.NAVIGATE";
 
@@ -197,7 +195,6 @@ public class CarContext extends ContextWrapper {
      */
     // This is kept for the testing library.
     @NonNull
-    @OptIn(markerClass = ExperimentalCarApi.class)
     public Object getCarService(@CarServiceType @NonNull String name) {
         switch (requireNonNull(name)) {
             case APP_SERVICE:
@@ -243,7 +240,6 @@ public class CarContext extends ContextWrapper {
      */
     @NonNull
     @CarServiceType
-    @OptIn(markerClass = ExperimentalCarApi.class)
     public String getCarServiceName(@NonNull Class<?> serviceClass) {
         if (requireNonNull(serviceClass).isInstance(mAppManager)) {
             return APP_SERVICE;
@@ -288,7 +284,7 @@ public class CarContext extends ContextWrapper {
      * @param intent the {@link Intent} to send to the target application
      * @throws SecurityException         if the app attempts to start a different app explicitly or
      *                                   does not have permissions for the requested action
-     * @throws InvalidParameterException if {@code intent} does not meet the criteria defined
+     * @throws HostException             if the remote call fails
      * @throws NullPointerException      if {@code intent} is {@code null}
      */
     public void startCarApp(@NonNull Intent intent) {
@@ -318,7 +314,10 @@ public class CarContext extends ContextWrapper {
      *                                   user in the car
      * @throws NullPointerException      if either {@code notificationIntent} or {@code appIntent
      *                                   } are {@code null}
+     * @deprecated use {@link CarPendingIntent#getCarApp(Context, int, Intent, int)} to create
+     * the pending intent for the notification action.  This API will NOT work for Automotive OS.
      */
+    @Deprecated
     public static void startCarApp(@NonNull Intent notificationIntent, @NonNull Intent appIntent) {
         requireNonNull(notificationIntent);
         requireNonNull(appIntent);
@@ -450,7 +449,6 @@ public class CarContext extends ContextWrapper {
      * @throws NullPointerException if either {@code permissions} or {@code callback} are {@code
      *                              null}
      */
-    @ExperimentalCarApi
     public void requestPermissions(@NonNull List<String> permissions,
             @NonNull OnRequestPermissionsCallback callback) {
         requestPermissions(ContextCompat.getMainExecutor(this), permissions, callback);
@@ -478,7 +476,6 @@ public class CarContext extends ContextWrapper {
      * @throws NullPointerException if any of {@code executor}, {@code permissions} or
      *                              {@code callback} are {@code null}
      */
-    @ExperimentalCarApi
     public void requestPermissions(@NonNull /* @CallbackExecutor */ Executor executor,
             @NonNull List<String> permissions, @NonNull OnRequestPermissionsCallback callback) {
         requireNonNull(executor);
@@ -596,7 +593,6 @@ public class CarContext extends ContextWrapper {
 
     /** @hide */
     @RestrictTo(LIBRARY_GROUP) // Restrict to testing library
-    @OptIn(markerClass = ExperimentalCarApi.class)
     @SuppressWarnings({
             "argument.type.incompatible",
             "method.invocation.invalid"
