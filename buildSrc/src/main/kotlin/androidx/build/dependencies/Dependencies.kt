@@ -113,6 +113,8 @@ val SKIKO_LINUX_X64 = "org.jetbrains.skiko:skiko-jvm-runtime-linux-x64:$SKIKO_VE
 val SKIKO_MACOS_X64 = "org.jetbrains.skiko:skiko-jvm-runtime-macos-x64:$SKIKO_VERSION"
 val SKIKO_MACOS_ARM64 = "org.jetbrains.skiko:skiko-jvm-runtime-macos-arm64:$SKIKO_VERSION"
 val SKIKO_WINDOWS_X64 = "org.jetbrains.skiko:skiko-jvm-runtime-windows-x64:$SKIKO_VERSION"
+val SKIKO_NATIVE_MACOS_X64 = "org.jetbrains.skiko:skiko-native-runtime-macos-x64:$SKIKO_VERSION"
+val SKIKO_CINTEROP_SKIA_MACOS_X64 = "org.jetbrains.skiko:skiko-cinterop-skia-macos-x64:$SKIKO_VERSION"
 val SKIKO_CURRENT_OS by lazy {
     val os = getOperatingSystem()
     val arch = System.getProperty("os.arch")
