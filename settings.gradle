@@ -261,6 +261,8 @@ if (isMultiplatformEnabled()) {
     includeProject(":compose:web", "compose/web", [BuildType.COMPOSE])
     includeProject(":compose:web:with-web-demo", "compose/web/with-web-demo", [BuildType.COMPOSE])
     includeProject(":compose:web:integration", "compose/web/integration", [BuildType.COMPOSE])
+    includeProject(":compose:native", "compose/native", [BuildType.COMPOSE])
+    includeProject(":compose:native:demo", "compose/native/demo", [BuildType.COMPOSE])
 }
 includeProject(":compose:foundation", "compose/foundation", [BuildType.COMPOSE])
 includeProject(":compose:foundation:foundation", "compose/foundation/foundation", [BuildType.COMPOSE])
