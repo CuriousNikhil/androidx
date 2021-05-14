@@ -27,16 +27,19 @@ import androidx.compose.ui.platform.DesktopComponent
 */
 import androidx.compose.ui.platform.NativeOwner
 import androidx.compose.ui.platform.NativeOwners
-import androidx.compose.ui.platform.setContent
+// import androidx.compose.ui.platform.setContent
 // import androidx.compose.ui.unit.Density
 /*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.swing.Swing
-import org.jetbrains.skija.Canvas
-import org.jetbrains.skiko.SkiaLayer
-import org.jetbrains.skiko.SkiaRenderer
+*/
+import org.jetbrains.skiko.skia.native.Canvas
+import org.jetbrains.skiko.native.SkiaLayer
+import org.jetbrains.skiko.native.SkiaRenderer
+
+/*
 import java.awt.Point
 import java.awt.event.FocusEvent
 import java.awt.event.InputMethodEvent
@@ -62,9 +65,9 @@ internal class ComposeLayer {
     internal val wrapped = Wrapped()
 */
     internal val owners: NativeOwners = NativeOwners(
-        coroutineScope,
-        wrapped,
-        wrapped::needRedraw
+        // coroutineScope,
+        // wrapped,
+        // wrapped::needRedraw
     )
 
     private var owner: NativeOwner? = null
@@ -128,9 +131,10 @@ internal class ComposeLayer {
                 try {
                     owners.onFrame(canvas, width, height, nanoTime)
                 } catch (e: Throwable) {
-                    if (System.getProperty("compose.desktop.render.ignore.errors") == null) {
-                        throw e
-                    }
+                    // TODO: K/N doesn't have Properties.
+                    // if (System.getProperty("compose.desktop.render.ignore.errors") == null) {
+                    //     throw e
+                    // }
                 }
             }
         }
