@@ -43,13 +43,15 @@ kotlin {
     }
 
     sourceSets {
-        //commonMain {
-        //    dependencies {
-        //        implementation project(":compose:runtime:runtime")
-        //    }
-        //}
+        commonMain {
+            dependencies {
+                implementation project(":compose:ui:ui")
+                implementation project(":compose:ui:ui-graphics")
+            }
+        }
 
         macosX64Main {
+            dependsOn commonMain
             dependencies {
                 implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
                 implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
