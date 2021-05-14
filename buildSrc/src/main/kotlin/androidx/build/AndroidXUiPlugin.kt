@@ -152,10 +152,14 @@ class AndroidXUiPlugin : Plugin<Project> {
                 configureForMultiplatform()
             }
 
-            tasks.withType(KotlinCompile::class.java).configureEach { compile ->
-                // Needed to enable `expect` and `actual` keywords
-                compile.kotlinOptions.freeCompilerArgs += "-Xmulti-platform"
-            }
+            // TODO: DON'T PUSH UPSTREAM!
+            // this seems to be incompatible with native targets.
+            // So we provide the options in the native build gradle
+            // But what should we really do here?
+            // tasks.withType(KotlinCompile::class.java).configureEach { compile ->
+            //    // Needed to enable `expect` and `actual` keywords
+            //    compile.kotlinOptions.freeCompilerArgs += "-Xmulti-platform"
+            // }
 
             tasks.withType(KotlinJsCompile::class.java).configureEach { compile ->
                 compile.kotlinOptions.freeCompilerArgs += listOf(
