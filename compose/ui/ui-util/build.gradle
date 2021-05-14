@@ -49,6 +49,7 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
     kotlin {
         android()
         jvm("desktop")
+        macosX64()
 
         /*
          * When updating dependencies, make sure to make the an an analogous update in the
@@ -68,6 +69,20 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
             }
 
             desktopMain.dependsOn(jvmMain)
+
+            nativeMain {
+                dependsOn commonMain
+                dependencies {
+                    implementation(SKIKO_NATIVE_MACOS_X64)
+                    // TODO: we do we need this explicit dependency?
+                    // Can we publish the skiko so that this klib is also brought along?
+                    implementation(SKIKO_NATIVE_INTEROP_SKIA_MACOS_X64)
+                }
+            }
+
+            macosX64Main {
+                dependsOn nativeMain
+            }
 
             commonTest.dependencies {
                 implementation(kotlin("test-junit"))
