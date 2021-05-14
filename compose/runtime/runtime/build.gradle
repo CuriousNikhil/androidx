@@ -82,7 +82,14 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                 }
             }
         }
-        macosX64()
+        macosX64() {
+            compilations.all {
+                kotlinOptions {
+//                    freeCompilerArgs += "-Xmulti-platform"
+ //                   freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=true"]
+                }
+            }
+        }
 
         /*
          * When updating dependencies, make sure to make the an an analogous update in the
