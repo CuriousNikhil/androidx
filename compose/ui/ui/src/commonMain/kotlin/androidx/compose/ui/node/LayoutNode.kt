@@ -73,7 +73,10 @@ internal val sharedDrawScope = LayoutNodeDrawScope()
 /**
  * An element in the layout hierarchy, built with compose UI.
  */
-internal class LayoutNode : Measurable, Remeasurement, OwnerScope, LayoutInfo, ComposeUiNode {
+
+// TODO: don't push. Make it internal back.
+// internal class LayoutNode : Measurable, Remeasurement, OwnerScope, LayoutInfo, ComposeUiNode {
+class LayoutNode : Measurable, Remeasurement, OwnerScope, LayoutInfo, ComposeUiNode {
 
     internal constructor() : this(false)
 

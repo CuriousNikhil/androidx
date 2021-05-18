@@ -28,7 +28,9 @@ import androidx.compose.ui.unit.LayoutDirection
 /**
  * A layer returned by [Owner.createLayer] to separate drawn content.
  */
-internal interface OwnedLayer : GraphicLayerInfo {
+// TODO: don't push make it internal back
+// internal interface OwnedLayer : GraphicLayerInfo {
+interface OwnedLayer : GraphicLayerInfo {
 
     /**
      * Applies the new layer properties and causing this layer to be redrawn.

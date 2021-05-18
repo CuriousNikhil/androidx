@@ -30,15 +30,14 @@ import javax.swing.JLayeredPane
  * ComposeWindow inherits javax.swing.JFrame.
  * @param parent The parent AppFrame that wraps the ComposeWindow.
  */
-class ComposeWindow(val parent: AppFrame) : SkiaWindow() {
+class ComposeWindow(val parent: AppFrame) /*: SkiaWindow()*/ {
     /*
     private var isDisposed = false
     */
-    override val layer = ComposeLayer()
+    val layer = ComposeLayer()
 
     val title: String
         get() = "TODO: get a title from SkiaWindow"
-        set(value) = println("TODO: pass title to SkiaWindow")
 
     fun setTitle(title: String) {
         println("TODO: set title to SkiaWindow")

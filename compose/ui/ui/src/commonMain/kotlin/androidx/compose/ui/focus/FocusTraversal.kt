@@ -48,7 +48,9 @@ enum class FocusDirection { Next, Previous, Left, Right, Up, Down }
  * be used to move focus from a parent to one of its children, and [Out] which moves focus to
  * the parent.
  */
-internal enum class FocusDirectionInternal { Next, Previous, Left, Right, Up, Down, In, Out }
+// TODO: don't push. Make me internal agaon.
+//internal enum class FocusDirectionInternal { Next, Previous, Left, Right, Up, Down, In, Out }
+enum class FocusDirectionInternal { Next, Previous, Left, Right, Up, Down, In, Out }
 
 /**
  * Moves focus based on the requested focus direction.

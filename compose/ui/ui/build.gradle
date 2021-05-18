@@ -165,9 +165,8 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                 }
                 dependsOn(jvmMain)
             }
-            macosX64Main {
-                //dependsOn(jvmMain)
-            }
+            nativeMain.dependsOn(commonMain)
+            macosX64Main.dependsOn(nativeMain)
 
             test.dependencies {
                 implementation(ANDROIDX_TEST_RULES)
