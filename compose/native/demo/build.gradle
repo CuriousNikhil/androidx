@@ -17,11 +17,16 @@
 import androidx.build.AndroidXUiPlugin
 import androidx.build.LibraryGroups
 import androidx.build.Publish
+import androidx.build.AndroidXUiPlugin
+import androidx.build.LibraryGroups
+import androidx.build.LibraryType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("AndroidXPlugin")
     id("AndroidXUiPlugin")
     id("kotlin-multiplatform")
+    id("application")
 }
 
 AndroidXUiPlugin.applyAndConfigureKotlinPlugin(project)
@@ -42,7 +47,7 @@ kotlin {
         }
     }
 
-    targets.all { 
+    targets.all {
         compilations.all {
             kotlinOptions {
                 freeCompilerArgs += "-Xmulti-platform"
@@ -54,22 +59,30 @@ kotlin {
     }
 
     sourceSets {
-//        commonMain {
- //           dependencies {
-  //              implementation project(":compose:runtime:runtime")
-   //         }
-    //    }
+        commonMain {
+            dependencies {
+                implementation project(":compose:runtime:runtime")
+                implementation project(":compose:ui:ui")
+            }
+        }
 
+        nativeMain {
+            dependencies {
+                commonMain
+                implementation project(":compose:native")
+            }
+        }
         macosX64Main {
+            dependsOn(nativeMain)
             dependencies {
                 // TODO: have a proper dependency here.
-                implementation(
-                        files("/Users/jetbrains/jetpack_compose_ui/androidx-main//out/androidx/compose/native/build/classes/kotlin/macosX64/main/native.klib")
-                )
-                implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
-                implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
+                //implementation(
+                        //files("/Users/jetbrains/jetpack_compose_ui/androidx-main//out/androidx/compose/native/build
+                        // /classes/kotlin/macosX64/main/native.klib")
+                //)
+                // implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
+                // implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
             }
         }
     }
 }
-

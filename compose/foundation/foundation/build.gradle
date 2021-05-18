@@ -83,6 +83,7 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
     kotlin {
         android()
         jvm("desktop")
+        macosX64()
 
         /*
          * When updating dependencies, make sure to make the an an analogous update in the
@@ -156,6 +157,8 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                     exclude group: "org.mockito" // to keep control on the mockito version
                 })
             }
+            nativeMain.dependsOn(commonMain)
+            macosX64Main.dependsOn(nativeMain)
         }
     }
 }

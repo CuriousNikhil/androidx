@@ -23,7 +23,9 @@ import androidx.compose.runtime.snapshots.SnapshotStateObserver
  * automatically when the snapshot value has been changed.
  */
 @Suppress("CallbackName") // TODO rename this and SnapshotStateObserver. b/173401548
-internal class OwnerSnapshotObserver(onChangedExecutor: (callback: () -> Unit) -> Unit) {
+// TODO: don't push. Make it internal again.
+// internal class OwnerSnapshotObserver(onChangedExecutor: (callback: () -> Unit) -> Unit) {
+class OwnerSnapshotObserver(onChangedExecutor: (callback: () -> Unit) -> Unit) {
 
     private val observer = SnapshotStateObserver(onChangedExecutor)
 

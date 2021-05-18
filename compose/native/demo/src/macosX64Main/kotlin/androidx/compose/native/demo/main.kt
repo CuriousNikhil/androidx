@@ -21,6 +21,9 @@ fun main() {
 
 fun createWindow(title: String) {
     val window = Window(title) {
+        Box(modifier = Modifier
+            .background(color = Color.Red)
+            .fillMaxSize())
         /*
         var text by remember { mutableStateOf("Hello, World!") }
 

@@ -70,6 +70,7 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
     kotlin {
         android()
         jvm("desktop")
+        macosX64()
 
         /* When updating dependencies, make sure to make the an an analogous update in the
             corresponding block above */

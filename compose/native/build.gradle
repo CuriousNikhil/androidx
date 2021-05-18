@@ -50,8 +50,10 @@ kotlin {
             }
         }
 
+        nativeMain.dependsOn(commonMain)
+
         macosX64Main {
-            dependsOn commonMain
+            dependsOn(nativeMain)
             dependencies {
                 implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
                 implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")

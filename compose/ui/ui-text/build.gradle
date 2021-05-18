@@ -88,6 +88,7 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
     kotlin {
         android()
         jvm("desktop")
+        macosX64()
 
         /*
          * When updating dependencies, make sure to make the an an analogous update in the
@@ -111,6 +112,9 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
 
             desktopMain.dependsOn(jvmMain)
             androidMain.dependsOn(jvmMain)
+
+            nativeMain.dependsOn(commonMain)
+            macosX64Main.dependsOn(nativeMain)
 
             androidMain.dependencies {
                 api("androidx.annotation:annotation:1.1.0")

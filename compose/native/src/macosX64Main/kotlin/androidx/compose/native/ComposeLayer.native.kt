@@ -26,9 +26,9 @@ import androidx.compose.ui.input.mouse.MouseScrollUnit
 import androidx.compose.ui.platform.DesktopComponent
 */
 import androidx.compose.ui.platform.NativeOwner
-import androidx.compose.ui.platform.NativeOwners
+// import androidx.compose.ui.platform.NativeOwners
 // import androidx.compose.ui.platform.setContent
-// import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Density
 /*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +53,7 @@ import java.awt.event.MouseWheelEvent
 import java.awt.im.InputMethodRequests
 */
 
-internal class ComposeLayer {
+/* internal */ class ComposeLayer {
 
     private var isDisposed = false
 /*
@@ -64,20 +64,21 @@ internal class ComposeLayer {
 
     internal val wrapped = Wrapped()
 */
+    /*
     internal val owners: NativeOwners = NativeOwners(
         // coroutineScope,
         // wrapped,
         // wrapped::needRedraw
     )
-
+*/
     private var owner: NativeOwner? = null
     private var composition: Composition? = null
 
     private var content: (@Composable () -> Unit)? = null
     private var parentComposition: CompositionContext? = null
-/*
-    private lateinit var density: Density
 
+    private lateinit var density: Density
+/*
     inner class Wrapped : SkiaLayer(), DesktopComponent {
         var currentInputMethodRequests: InputMethodRequests? = null
 
@@ -128,6 +129,8 @@ internal class ComposeLayer {
     init {
         component.renderer = object : SkiaRenderer {
             override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
+                TODO("implement ComposeLayer onRender")
+                /*
                 try {
                     owners.onFrame(canvas, width, height, nanoTime)
                 } catch (e: Throwable) {
@@ -136,6 +139,8 @@ internal class ComposeLayer {
                     //     throw e
                     // }
                 }
+
+                 */
             }
         }
         initCanvas()
@@ -267,6 +272,8 @@ internal class ComposeLayer {
         parentComposition: CompositionContext? = null,
         content: @Composable () -> Unit
     ) {
+        TODO("implement native ComposeLayer setContent")
+        /*
         check(!isDisposed)
         check(this.content == null) { "Cannot set content twice" }
         this.content = content
@@ -274,13 +281,16 @@ internal class ComposeLayer {
         // We can't create NativeOwner now, because we don't know density yet.
         // We will know density only after SkiaLayer will be visible.
         initOwner()
+
+         */
     }
 
     private fun initOwner() {
         check(!isDisposed)
-        if (wrapped.isInit && owner == null && content != null) {
-            owner = NativeOwner(owners, density)
-            composition = owner!!.setContent(parent = parentComposition, content = content!!)
+        if (/*wrapped.isInit && */owner == null && content != null) {
+            owner = NativeOwner(/*owners, */density)
+            TODO("implement vvvv NativeOwner.setContent")
+            //composition = owner!!.setContent(parent = parentComposition, content = content!!)
         }
     }
 }
