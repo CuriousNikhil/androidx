@@ -3,6 +3,11 @@ package androidx.compose.native.demo
 import platform.AppKit.*
 
 import androidx.compose.native.Window
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.*
+
 /*
 import androidx.compose.material.Text
 import androidx.compose.material.Button
@@ -20,10 +25,12 @@ fun main() {
 }
 
 fun createWindow(title: String) {
-    val window = Window(title) {
+    /*val window = */
+    Window(title) {
         Box(modifier = Modifier
             .background(color = Color.Red)
-            .fillMaxSize())
+            .fillMaxSize()
+        )
         /*
         var text by remember { mutableStateOf("Hello, World!") }
 
