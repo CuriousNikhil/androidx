@@ -109,6 +109,9 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                 implementation(KOTLIN_STDLIB)
             }
 
+            nativeMain.dependsOn(commonMain)
+            macosX64Main.dependsOn(nativeMain)
+
             androidTest.dependencies {
                 implementation(ANDROIDX_TEST_RULES)
                 implementation(ANDROIDX_TEST_RUNNER)
@@ -156,8 +159,6 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                     exclude group: "org.mockito" // to keep control on the mockito version
                 })
             }
-            nativeMain.dependsOn(commonMain)
-            macosX64Main.dependsOn(nativeMain)
         }
     }
 }

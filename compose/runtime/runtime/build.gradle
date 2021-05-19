@@ -120,6 +120,8 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
                     implementation(kotlin("stdlib-js"))
                 }
             }
+            nativeMain.dependsOn(commonMain)
+            macosX64Main.dependsOn(nativeMain)
             commonTest {
                 dependencies {
                     implementation(KOTLIN_TEST_JUNIT)
