@@ -22,8 +22,8 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
-import org.jetbrains.skiko.skia.native.RRect as SkiaRRect
-import org.jetbrains.skiko.skia.native.SkRect as SkiaRect
+// import org.jetbrains.skiko.skia.native.RRect as SkiaRRect
+// import org.jetbrains.skiko.skia.native.SkRect as SkiaRect
 
 // TODO remove me.
 // NativeCanvas is taken by the common expect.

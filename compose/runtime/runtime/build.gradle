@@ -84,8 +84,12 @@ if(AndroidXUiPlugin.isMultiplatformEnabled(project)) {
         macosX64() {
             compilations.all {
                 kotlinOptions {
-//                    freeCompilerArgs += "-Xmulti-platform"
- //                   freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=true"]
+                    freeCompilerArgs += "-Xmulti-platform"
+                    freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=false"]
+
+                    freeCompilerArgs +=
+                            "-Xplugin=/Users/jetbrains/jetpack_compose_ui/androidx-main/out/androidx/compose/compiler/compiler-hosted/build//libs/compiler-hosted-1.0.0-beta06.jar"
+
                 }
             }
         }

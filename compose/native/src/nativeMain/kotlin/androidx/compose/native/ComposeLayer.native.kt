@@ -39,20 +39,6 @@ import org.jetbrains.skiko.skia.native.Canvas
 import org.jetbrains.skiko.native.SkiaLayer
 import org.jetbrains.skiko.native.SkiaRenderer
 
-/*
-import java.awt.Point
-import java.awt.event.FocusEvent
-import java.awt.event.InputMethodEvent
-import java.awt.event.InputMethodListener
-import java.awt.event.KeyAdapter
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import java.awt.event.MouseMotionAdapter
-import java.awt.event.MouseWheelEvent
-import java.awt.im.InputMethodRequests
-*/
-
 /* internal */ class ComposeLayer {
 
     private var isDisposed = false

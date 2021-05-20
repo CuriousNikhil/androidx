@@ -95,7 +95,15 @@ class AndroidXUiPlugin : Plugin<Project> {
 
                     project.tasks.withType(KotlinJsCompile::class.java)
                         .configureEach(configure)
+/*
+                    project.tasks.withType(KotlinJvmCompile::class.java)
+                        .configureEach { compile ->
+                            compile.kotlinOptions.useIR = true
+                        }
 
+                    project.tasks.withType(KotlinCompile::class.java)
+                        .configureEach(configure)
+*/
                     project.afterEvaluate {
                         val androidXExtension =
                             project.extensions.findByType(AndroidXExtension::class.java)
