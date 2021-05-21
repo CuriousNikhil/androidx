@@ -67,25 +67,25 @@ class ComposableSymbolRemapper : DeepCopySymbolRemapper(
             descriptor.takeUnless { it.isTransformed() }
 
         private fun ClassConstructorDescriptor.isTransformed(): Boolean =
-            this is IrBasedDeclarationDescriptor<*>
-                || valueParameters.any { it.type.containsComposable() }
+            this is IrBasedDeclarationDescriptor<*> ||
+                valueParameters.any { it.type.containsComposable() }
 
         private fun FunctionDescriptor.isTransformed(): Boolean =
-            this is IrBasedDeclarationDescriptor<*>
-                || valueParameters.any { it.type.containsComposable() }
-                || returnType?.containsComposable() == true
+            this is IrBasedDeclarationDescriptor<*> ||
+                valueParameters.any { it.type.containsComposable() } ||
+                returnType?.containsComposable() == true
 
         private fun ParameterDescriptor.isTransformed(): Boolean =
-            this is IrBasedDeclarationDescriptor<*>
-                || type.containsComposable()
-                || containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
+            this is IrBasedDeclarationDescriptor<*> ||
+                type.containsComposable() ||
+                containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
 
         private fun TypeParameterDescriptor.isTransformed(): Boolean =
-            this is IrBasedDeclarationDescriptor<*>
-                || containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
+            this is IrBasedDeclarationDescriptor<*> ||
+                containingDeclaration.let { it is FunctionDescriptor && it.isTransformed() }
 
         private fun KotlinType.containsComposable() =
-            hasComposableAnnotation()
-                || arguments.any { it.type.hasComposableAnnotation() }
+            hasComposableAnnotation() ||
+                arguments.any { it.type.hasComposableAnnotation() }
     }
 )

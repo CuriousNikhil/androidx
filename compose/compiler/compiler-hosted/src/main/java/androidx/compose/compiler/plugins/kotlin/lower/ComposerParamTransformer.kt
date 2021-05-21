@@ -613,7 +613,6 @@ class ComposerParamTransformer(
         return isInvoke() && dispatchReceiver?.type?.hasComposableAnnotation() == true
     }
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun IrFunction.isNonComposableInlinedLambda(): Boolean {
         for (element in inlinedFunctions) {
             if (element.argument.function != this)
