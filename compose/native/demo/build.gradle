@@ -44,6 +44,8 @@ kotlin {
         binaries {
             executable() {
                 entryPoint = "androidx.compose.native.demo.main"
+                // TODO: need the proper plugin flag for the binary for the final link.
+                freeCompilerArgs += "-Xplugin=" + project.rootDir.absolutePath + "/../../out/androidx/compose/compiler/compiler-hosted/build//libs/compiler-hosted-1.0.0-beta08.jar"
             }
         }
     }
