@@ -48,9 +48,9 @@ class ComposableDeclarationChecker : DeclarationChecker, StorageComponentContain
         platform: TargetPlatform,
         moduleDescriptor: ModuleDescriptor
     ) {
-        if (platform.isJvm() || platform.isJs()) {
+        //if (platform.isJvm() || platform.isJs()) {
             container.useInstance(this)
-        }
+        //}
     }
 
     override fun check(
