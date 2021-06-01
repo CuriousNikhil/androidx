@@ -118,10 +118,13 @@ import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.getClass
+
+import org.jetbrains.kotlin.ir.types.isClassWithFqName
+/*
 import org.jetbrains.kotlin.ir.types.isBoolean
 import org.jetbrains.kotlin.ir.types.isByte
 import org.jetbrains.kotlin.ir.types.isChar
-import org.jetbrains.kotlin.ir.types.isClassWithFqName
+
 import org.jetbrains.kotlin.ir.types.isDouble
 import org.jetbrains.kotlin.ir.types.isFloat
 import org.jetbrains.kotlin.ir.types.isInt
@@ -130,6 +133,8 @@ import org.jetbrains.kotlin.ir.types.isNothing
 import org.jetbrains.kotlin.ir.types.isNullableAny
 import org.jetbrains.kotlin.ir.types.isShort
 import org.jetbrains.kotlin.ir.types.isUnit
+*/
+
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.toKotlinType
 import org.jetbrains.kotlin.ir.util.DeepCopySymbolRemapper
@@ -158,6 +163,8 @@ import kotlin.math.absoluteValue
 import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.reflect.KProperty
+import org.jetbrains.kotlin.backend.common.ir.ir2stringWhole
+import org.jetbrains.kotlin.ir.util.render
 
 /**
  * An enum of the different "states" a parameter of a composable function can have relating to
@@ -3978,6 +3985,18 @@ private fun IrType.isNullableClassType(fqName: FqNameUnsafe) =
     isClassType(fqName, hasQuestionMark = true)
 fun IrType.isNullableUnit() = isNullableClassType(StandardNames.FqNames.unit)
 fun IrType.isUnitOrNullableUnit() = this.isUnit() || this.isNullableUnit()
+
+fun IrType.isBoolean() = isNotNullClassType(StandardNames.FqNames._boolean)
+fun IrType.isByte() = isNotNullClassType(StandardNames.FqNames._byte)
+fun IrType.isChar() = isNotNullClassType(StandardNames.FqNames._char)
+fun IrType.isDouble() = isNotNullClassType(StandardNames.FqNames._double)
+fun IrType.isFloat() = isNotNullClassType(StandardNames.FqNames._float)
+fun IrType.isInt() = isNotNullClassType(StandardNames.FqNames._int)
+fun IrType.isLong() = isNotNullClassType(StandardNames.FqNames._long)
+fun IrType.isNothing() = isNotNullClassType(StandardNames.FqNames.nothing)
+fun IrType.isNullableAny() = isNullableClassType(StandardNames.FqNames.any)
+fun IrType.isShort() = isNotNullClassType(StandardNames.FqNames._short)
+fun IrType.isUnit() = isNotNullClassType(StandardNames.FqNames.unit)
 
 internal object UNINITIALIZED_VALUE
 
