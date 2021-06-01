@@ -436,7 +436,8 @@ class ComposerTypeRemapper(
         if (!type.isFunction()) return underlyingRemapType(type)
         if (!type.isComposable()) return underlyingRemapType(type)
         // do not convert types for decoys
-        if (scopeStack.peek()?.isDecoy() == true) {
+        // TODO: native can't find .parent here, workarounding by don't even tring.
+        if (context.platform.isJs() && scopeStack.peek()?.isDecoy() == true) {
             return underlyingRemapType(type)
         }
 
