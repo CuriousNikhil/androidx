@@ -28,7 +28,9 @@ plugins {
 
 dependencies {
     compileOnly(KOTLIN_STDLIB)
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler:$KOTLIN_VERSION")
+    //compileOnly("org.jetbrains.kotlin:kotlin-compiler:$KOTLIN_VERSION")
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler:1.5.0-CUSTOM") // This to build the plugin with the changed kotlin compiler
+    compileOnly(files("/Users/jetbrains/jetpack_compose_ui/androidx-main/frameworks/support/tmpcp"))
 }
 
 tasks.withType(KotlinCompile).configureEach {
