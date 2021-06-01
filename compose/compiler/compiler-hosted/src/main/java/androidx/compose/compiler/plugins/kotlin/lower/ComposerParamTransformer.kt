@@ -79,6 +79,7 @@ import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.ir.util.isInlined
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.ir.util.remapTypes
+import org.jetbrains.kotlin.ir.util.render
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.ir.visitors.transformChildrenVoid
@@ -615,7 +616,12 @@ class ComposerParamTransformer(
 
     private fun IrFunction.isNonComposableInlinedLambda(): Boolean {
         for (element in inlinedFunctions) {
-            if (element.argument.function != this)
+            // if (element.argument.function != this)
+            // TODO: an awful hack to see through a deep copy.
+            // Otherwise the code doesn't work for native.
+            // What should we really do here? Search in transformedFunctions?
+            // Or in symbolRemapper's map?
+            if (element.argument.function != this && element.argument.function.render() != this.render())
                 continue
             if (!element.parameter.type.hasComposableAnnotation())
                 return true
