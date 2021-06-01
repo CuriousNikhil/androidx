@@ -282,6 +282,7 @@ internal fun <T> CompositionLocalMap.getValueOf(key: CompositionLocal<T>) =
     this[key as CompositionLocal<Any?>]?.value as T
 
 @Composable
+@kotlin.native.internal.ExportForCppRuntime
 private fun compositionLocalMapOf(
     values: Array<out ProvidedValue<*>>,
     parentScope: CompositionLocalMap
@@ -951,6 +952,7 @@ inline fun <T> Composer.cache(invalid: Boolean, block: () -> T): T {
  * side-effects. It is safe for code shrinking tools (such as R8 or ProGuard) to remove it.
  */
 @ComposeCompilerApi
+@kotlin.native.internal.ExportForCppRuntime
 fun sourceInformation(composer: Composer, sourceInformation: String) {
     composer.sourceInformation(sourceInformation)
 }
