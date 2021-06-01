@@ -48,17 +48,6 @@ kotlin {
         }
     }
 
-    targets.all {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs += "-Xmulti-platform"
-                freeCompilerArgs += ["-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateDecoys=false"]
-                freeCompilerArgs +=
-                        "-Xplugin=/Users/jetbrains/jetpack_compose_ui/androidx-main/out/androidx/compose/compiler/compiler-hosted/build//libs/compiler-hosted-1.0.0-beta06.jar"
-            }
-        }
-    }
-
     sourceSets {
         commonMain {
         }
@@ -81,11 +70,6 @@ kotlin {
                 implementation project(":compose:ui:ui-graphics")
                 // implementation project(":compose:ui:ui-text")
 
-                // TODO: have a proper dependency here.
-                //implementation(
-                        //files("/Users/jetbrains/jetpack_compose_ui/androidx-main//out/androidx/compose/native/build
-                        // /classes/kotlin/macosX64/main/native.klib")
-                //)
                 implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
                 implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
             }
