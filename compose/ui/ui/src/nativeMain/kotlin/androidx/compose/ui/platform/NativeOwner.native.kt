@@ -25,15 +25,14 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.Autofill
 import androidx.compose.ui.autofill.AutofillTree
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusDirectionInternal
-import androidx.compose.ui.focus.FocusDirectionInternal.Down
-import androidx.compose.ui.focus.FocusDirectionInternal.In
-import androidx.compose.ui.focus.FocusDirectionInternal.Left
-import androidx.compose.ui.focus.FocusDirectionInternal.Next
-import androidx.compose.ui.focus.FocusDirectionInternal.Out
-import androidx.compose.ui.focus.FocusDirectionInternal.Previous
-import androidx.compose.ui.focus.FocusDirectionInternal.Right
-import androidx.compose.ui.focus.FocusDirectionInternal.Up
+import androidx.compose.ui.focus.FocusDirection.Companion.Down
+import androidx.compose.ui.focus.FocusDirection.Companion.In
+import androidx.compose.ui.focus.FocusDirection.Companion.Left
+import androidx.compose.ui.focus.FocusDirection.Companion.Next
+import androidx.compose.ui.focus.FocusDirection.Companion.Out
+import androidx.compose.ui.focus.FocusDirection.Companion.Previous
+import androidx.compose.ui.focus.FocusDirection.Companion.Right
+import androidx.compose.ui.focus.FocusDirection.Companion.Up
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusManagerImpl
 import androidx.compose.ui.geometry.Offset
@@ -48,7 +47,6 @@ import androidx.compose.ui.input.key.Key.Companion.DirectionUp
 import androidx.compose.ui.input.key.Key.Companion.Tab
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.KeyEventType.KeyDown
 import androidx.compose.ui.input.key.KeyInputModifier
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
@@ -112,29 +110,9 @@ private typealias Command = () -> Unit
     override val windowInfo: WindowInfo
         get() = _windowInfo
 
-
-    // TODO(b/177931787) : Consider creating a KeyInputManager like we have for FocusManager so
-    //  that this common logic can be used by all owners.
     private val keyInputModifier: KeyInputModifier = KeyInputModifier(
         onKeyEvent = {
-            val focusDirection = getFocusDirection(it)
-            if (focusDirection == null || it.type != KeyDown) return@KeyInputModifier false
-
-            val focusMoveSuccess = with(focusManager) {
-                when (focusDirection) {
-                    Up -> moveFocus(FocusDirection.Up)
-                    Down -> moveFocus(FocusDirection.Down)
-                    Left -> moveFocus(FocusDirection.Left)
-                    Right -> moveFocus(FocusDirection.Right)
-                    In -> moveFocusIn()
-                    Out -> moveFocusOut()
-                    Next -> moveFocus(FocusDirection.Next)
-                    Previous -> moveFocus(FocusDirection.Previous)
-                }
-            }
-
-            // Consume the key event if we moved focus.
-            focusMoveSuccess
+             TODO("Implement native keyInputModifier")
         },
         onPreviewKeyEvent = null
     )
@@ -285,7 +263,7 @@ private typealias Command = () -> Unit
         drawBlock: (Canvas) -> Unit,
         invalidateParentLayer: () -> Unit
     ) = SkiaNativeLayer(
-        this::density,
+        density,
         invalidateParentLayer = {
             invalidateParentLayer()
             requestDraw()
@@ -298,7 +276,8 @@ private typealias Command = () -> Unit
 
     override fun onLayoutChange(layoutNode: LayoutNode) = Unit
 
-    override fun getFocusDirection(keyEvent: KeyEvent): FocusDirectionInternal? {
+    override fun getFocusDirection(keyEvent: KeyEvent): FocusDirection? {
+        //TODO("implement native getFocusDirection")
         return when (keyEvent.key) {
             Tab -> if (keyEvent.isShiftPressed) Previous else Next
             DirectionRight -> Right

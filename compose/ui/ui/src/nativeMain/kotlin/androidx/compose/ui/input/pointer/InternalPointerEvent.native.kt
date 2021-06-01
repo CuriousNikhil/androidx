@@ -23,11 +23,11 @@ class NativeMouseEvent
 
 
 internal actual class InternalPointerEvent constructor(
-    actual var changes: MutableMap<PointerId, PointerInputChange>,
+    actual val changes: Map<PointerId, PointerInputChange>,
     val mouseEvent: NativeMouseEvent?
 ) {
     actual constructor(
-        changes: MutableMap<PointerId, PointerInputChange>,
+        changes: Map<PointerId, PointerInputChange>,
         pointerInputEvent: PointerInputEvent
     ) : this(changes, pointerInputEvent.mouseEvent)
 }

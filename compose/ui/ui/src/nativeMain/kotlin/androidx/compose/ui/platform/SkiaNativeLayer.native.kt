@@ -17,6 +17,8 @@
 package androidx.compose.ui.platform
 
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.geometry.MutableRect
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Canvas
@@ -48,7 +50,7 @@ import org.jetbrains.skiko.skia.native.ShadowUtils
  */
 
 /* internal */ class SkiaNativeLayer(
-    private val getDensity: () -> Density,
+    private var density: Density,
     private val invalidateParentLayer: () -> Unit,
     private val drawBlock: (Canvas) -> Unit,
     private val onDestroy: () -> Unit = {}
@@ -56,7 +58,7 @@ import org.jetbrains.skiko.skia.native.ShadowUtils
     private var size = IntSize.Zero
     private var position = IntOffset.Zero
     private var outlineCache =
-        OutlineCache(getDensity(), size, RectangleShape, LayoutDirection.Ltr)
+        OutlineCache(density, size, RectangleShape, LayoutDirection.Ltr)
     private val matrix = Matrix()
     private val pictureRecorder: Any // = PictureRecorder()
         get() = TODO("implement native picture recorder")
@@ -98,15 +100,32 @@ import org.jetbrains.skiko.skia.native.ShadowUtils
         }
     }
 
+    override fun mapOffset(point: Offset, inverse: Boolean): Offset {
+        return getMatrix(inverse).map(point)
+    }
+
+    override fun mapBounds(rect: MutableRect, inverse: Boolean) {
+        getMatrix(inverse).map(rect)
+    }
+
+
+    private fun getMatrix(inverse: Boolean): Matrix {
+        return if (inverse) {
+            Matrix().apply {
+                setFrom(matrix)
+                invert()
+            }
+        } else {
+            matrix
+        }
+    }
+
+
     override fun move(position: IntOffset) {
         if (position != this.position) {
             this.position = position
             invalidateParentLayer()
         }
-    }
-
-    override fun getMatrix(matrix: Matrix) {
-        matrix.setFrom(this.matrix)
     }
 
     override fun updateLayerProperties(
@@ -123,7 +142,8 @@ import org.jetbrains.skiko.skia.native.ShadowUtils
         transformOrigin: TransformOrigin,
         shape: Shape,
         clip: Boolean,
-        layoutDirection: LayoutDirection
+        layoutDirection: LayoutDirection,
+        density: Density
     ) {
         this.transformOrigin = transformOrigin
         this.translationX = translationX
@@ -136,8 +156,10 @@ import org.jetbrains.skiko.skia.native.ShadowUtils
         this.alpha = alpha
         this.clip = clip
         this.shadowElevation = shadowElevation
+        this.density = density
         outlineCache.shape = shape
         outlineCache.layoutDirection = layoutDirection
+        outlineCache.density = density
         updateMatrix()
         invalidate()
     }

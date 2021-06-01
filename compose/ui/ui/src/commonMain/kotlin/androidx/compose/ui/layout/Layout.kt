@@ -170,12 +170,16 @@ internal fun measureBlocksOf(
 @PublishedApi
 internal fun materializerOf(
     modifier: Modifier
-): @Composable SkippableUpdater<ComposeUiNode>.() -> Unit = {
-    val materialized = currentComposer.materialize(modifier)
-    update {
-        set(materialized, ComposeUiNode.SetModifier)
+): @Composable SkippableUpdater<ComposeUiNode>.() -> Unit = 
+    // TODO: This @Composable is not needed here.
+    // But native compiler somehow doesn't infer it now.
+    // So we force lambda processing in native by explicitly specifying the annotation.
+    @Composable {
+        val materialized = currentComposer.materialize(modifier)
+            update {
+                set(materialized, ComposeUiNode.SetModifier)
+            }
     }
-}
 
 @Suppress("ComposableLambdaParameterPosition")
 @Composable
