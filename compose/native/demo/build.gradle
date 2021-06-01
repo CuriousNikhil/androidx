@@ -32,6 +32,7 @@ plugins {
 AndroidXUiPlugin.applyAndConfigureKotlinPlugin(project)
 dependencies {
     kotlinPlugin project(":compose:compiler:compiler")
+    kotlinNativeCompilerPluginClasspath(project(":compose:compiler:compiler-hosted"))
 }
 
 repositories {
@@ -71,6 +72,8 @@ kotlin {
         macosX64Main {
             dependsOn(nativeMain)
             dependencies {
+                implementation project(":compose:ui:ui")
+                implementation project(":compose:ui:ui-graphics")
                 implementation project(":compose:foundation:foundation")
                 implementation project(":compose:foundation:foundation-layout")
                 implementation project(":compose:runtime:runtime")
@@ -83,8 +86,8 @@ kotlin {
                         //files("/Users/jetbrains/jetpack_compose_ui/androidx-main//out/androidx/compose/native/build
                         // /classes/kotlin/macosX64/main/native.klib")
                 //)
-                // implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
-                // implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
+                implementation("org.jetbrains.skiko:skiko-native-runtime-macos-x64:$skiko_version")
+                implementation("org.jetbrains.skiko:skiko-native-skia-interop-macos-x64:$skiko_version")
             }
         }
     }
